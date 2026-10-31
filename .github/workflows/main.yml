@@ -29,7 +29,7 @@ jobs:
       - name: Authenticate to Salesforce Org
         run: |
           # Write the secret key content to a temporary file
-          echo "${{ secrets.SF_JWT_KEY }}" > server.key
+          echo "${{ secrets.SF_SERVERKEY }}" > server.key
           
           # Execute the headless login command
           sf org login jwt \
