@@ -1,0 +1,47 @@
+name: Salesforce Login
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  salesforce-auth:
+    runs-on: ubuntu-latest
+    environment: Logik_Flow
+
+    steps:
+      # Step 1: Check out the repository code
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      # Step 2: Install Node.js (required for Salesforce CLI)
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # Step 3: Install the modern Salesforce CLI globally
+      - name: Install Salesforce CLI
+        run: npm install -g @salesforce/cli
+
+      # Step 4: Authenticate using the JWT Bearer Flow
+      - name: Authenticate to Salesforce Org
+        run: |
+          # Write the secret key content to a temporary file
+          echo "${{ secrets.SF_JWT_KEY }}" > server.key
+          
+          # Execute the headless login command
+          sf org login jwt \
+            --client-id ${{ secrets.SF_CLIENT_ID }} \
+            --jwt-key-file server.key \
+            --username ${{ secrets.SF_USERNAME }} \
+            --instance-url ${{ secrets.SF_INSTANCE_URL }} \
+            --set-default
+            
+          # Remove the temporary key file immediately for security
+          rm server.key
+
+      # Step 5: Verify the connection (Optional test step)
+      - name: Check Org Status
+        run: sf org display
